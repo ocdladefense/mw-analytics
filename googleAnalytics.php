@@ -5,23 +5,21 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 
 $wgExtensionCredits['other'][] = array(
 	'path'           => __FILE__,
-	'name'           => 'Google Analytics Integration',
-	'version'        => '2.0.2',
-	'author'         => 'Tim Laqua',
-	'descriptionmsg' => 'googleanalytics-desc',
-	'url'            => 'https://www.mediawiki.org/wiki/Extension:Google_Analytics_Integration',
+	'name'           => 'Analytics Integration',
+	'version'        => '0.1-alpha',
+	'author'         => 'José Bernal',
+	'descriptionmsg' => 'analytics-desc',
+	'url'            => '',
 );
 
-$wgExtensionMessagesFiles['googleAnalytics'] = dirname(__FILE__) . '/googleAnalytics.i18n.php';
+// $wgExtensionMessagesFiles['analytics'] = dirname(__FILE__) . '/googleAnalytics.i18n.php';
 
 $wgHooks['SkinAfterBottomScripts'][]  = 'efGoogleAnalyticsHookText';
-$wgHooks['ParserAfterTidy'][] = 'efGoogleAnalyticsASAC';
+// $wgHooks['ParserAfterTidy'][] = 'efGoogleAnalyticsASAC';
 
 
-$wgGoogleAnalyticsAccount = "UA-32154784-1";
-$wgGoogleAnalyticsAddASAC = false;
-$wgGoogleAnalyticsIgnoreSysops = true;
-$wgGoogleAnalyticsIgnoreBots = true;
+
+
 
 function efGoogleAnalyticsASAC( &$parser, &$text ) {
 	global $wgOut, $wgGoogleAnalyticsAccount, $wgGoogleAnalyticsAddASAC;
@@ -39,7 +37,21 @@ function efGoogleAnalyticsHookText( $skin, &$text='' ) {
 }
 
 function efAddGoogleAnalytics() {
-	global $wgGoogleAnalyticsAccount, $wgGoogleAnalyticsIgnoreSysops, $wgGoogleAnalyticsIgnoreBots, $wgUser;
+	
+	// Use any analytics?
+	global $wgUseAnalytics,
+	
+	// Specific to Google Analytics.
+	$wgGoogleAnalyticsAccount,
+	
+	$wgGoogleAnalyticsIgnoreSysops,
+	
+	$wgGoogleAnalyticsIgnoreBots,
+	
+	$wgUser;
+
+
+
 	if ( $wgUser->isAllowed( 'bot' ) && $wgGoogleAnalyticsIgnoreBots ) {
 		return "\n<!-- Google Analytics tracking is disabled for bots -->";
 	}
@@ -55,16 +67,14 @@ function efAddGoogleAnalytics() {
 	}
 
 	return <<<HTML
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-32154784-1']);
-  _gaq.push(['_trackPageview']);
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={$wgGoogleAnalyticsAccount}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+  gtag('config', '{$wgGoogleAnalyticsAccount}');
 </script>
 HTML;
 }
